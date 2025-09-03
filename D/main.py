@@ -245,6 +245,7 @@ def test():
     )
     board = create_crossward(test_words)
     print(Board.frommatrix(board).textify())  # sorry lsp
+    print("To make it easy, try to locate ken-morel (look for the hyphen)")
 
 
 if __name__ == "__main__":
