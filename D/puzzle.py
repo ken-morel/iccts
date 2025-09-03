@@ -58,7 +58,7 @@ class Board(list):
         super().__init__([[N for _ in range(height)] for _ in range(width)])
 
     @contextmanager
-    def reset_on_nowrite(self):
+    def reset_on_noplace(self):
         """
         Hold and reset the board state if `Board.CanNotwrite` raised in context.
 
@@ -68,7 +68,7 @@ class Board(list):
         orig = [i.copy() for i in self]
         try:
             yield
-        except Board.CanNotwrite:
+        except Board.CanNotPlace:
             self[:] = orig
         except:
             raise
@@ -86,30 +86,6 @@ class Board(list):
         """
         for i in range(len(word)):
             self[x][y + i] = word[i]
-
-    # def writeword_topwards(self, word: str, x: int, y: int):
-    #     """
-    #     write `word` vertically upwards from (x, y).
-    #     """
-    #     self.writeword_verticaly(word[::-1], x, y - len(word))
-    #
-    # def writeword_downwards(self, word: str, x: int, y: int):
-    #     """
-    #     write `word` vertically downwards starting form (x, y).
-    #     """
-    #     self.writeword_verticaly(word, x, y)
-    #
-    # def writeword_leftwards(self, word: str, x: int, y: int):
-    #     """
-    #     write `word` towards left, starting at (x, y)
-    #     """
-    #     self.writeword_horizontaly(word[::-1], x - len(word), y)
-    #
-    # def writeword_rightwards(self, word: str, x: int, y: int):
-    #     """
-    #     write `word` horizontaly towards right starting at (x, y)
-    #     """
-    #     self.writeword_horizontaly(word, x, y)
 
     def textify(self) -> str:
         """
@@ -214,6 +190,42 @@ class Board(list):
         downwards from (x, y).
         """
         return all([self[x][y + i] in (word[i], N) for i in range(len(word))])
+
+    def fill_empty_spaces(self):
+        """
+        Fills empty spaces in the board.
+        replace the empty spaces(equal to `N`) with a random uppercase english letter.
+        """
+        for x in range(self.width):
+            for y in range(self.height):
+                if self[x][y] == N:
+                    self[x][y] = randch()
+
+
+def create_crossward(words: list[str]) -> list[list[str]]:
+    """
+    This is the function asked in the excersice it creates a board,
+    places the words in it, then return the board.
+    The placement algorithm was made in such away to permit words
+    to be place horizontaly, verticaly, in forward or backward
+    directions, and with crosswards. It does not implement an
+    re-organisation algorithm to replace previously placed letters
+    very efficiently yet, but the random works fine with several iterations.
+    :arg words: The
+    """
+    board = Board(10, 10)
+    for _ in range(1000):  # try several random placements, reduce error risks
+        random.shuffle(words)  # why just am I doing this? :D
+        with board.reset_on_noplace():  # to original state if placing fails
+            for word in words:
+                board.placeword(word)
+            return list(
+                board
+            )  # board is already an instance of list, but just in case.
+    raise Board.CanNotPlace(
+        "Sorry, the words could not be efficiently placed."
+        "May be placing several words get's not so easy"
+    )
 
 
 def main():
