@@ -49,6 +49,16 @@ class Board(list):
         Raised when the required word could not be found a place.
         """
 
+    @classmethod
+    def frommatrix(cls, matrix: list[list[str]]) -> "Board":
+        """
+        Create a board using the prepared matrix character data.
+        """
+        assert len(matrix) > 0, "Cannot use an empty matrix"
+        board = Board(len(matrix), len(matrix[0]))
+        board[:] = [m.copy() for m in matrix]  # make sure to make a real copy
+        return board
+
     width: int
     height: int
 
@@ -219,6 +229,7 @@ def create_crossward(words: list[str]) -> list[list[str]]:
         with board.reset_on_noplace():  # to original state if placing fails
             for word in words:
                 board.placeword(word)
+            board.fill_empty_spaces()
             return list(
                 board
             )  # board is already an instance of list, but just in case.
@@ -228,13 +239,13 @@ def create_crossward(words: list[str]) -> list[list[str]]:
     )
 
 
-def main():
-    test_words = list(map(str.upper, ["banana", "orange", "blue", "purple"]))
-    board = Board(10, 10)
-    for word in test_words:
-        board.placeword(word)
-    print(board.textify())
+def test():
+    test_words = list(
+        map(str.upper, ["banana", "orange", "blue", "purple", "ken-morel", "ama"])
+    )
+    board = create_crossward(test_words)
+    print(Board.frommatrix(board).textify())  # sorry lsp
 
 
 if __name__ == "__main__":
-    main()
+    test()
