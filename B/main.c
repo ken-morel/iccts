@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdlib.h>
 
 #define min(a, b) a < b ? a : b
@@ -31,7 +32,6 @@ CakeAnswer cake_calculator(int floor, int sugar) {
     nfloor = floor / Units.floor; // `floor` floor
     nsugar = sugar / Units.sugar; // `sugar` sugar
   }
-
   ncakes = min(nfloor, nsugar); // number of cakes which can be made
   answer[0] = ncakes;
   answer[1] = floor - (Units.floor * ncakes); // remeaning floor
