@@ -223,6 +223,7 @@ def create_crossward(words: list[str]) -> list[list[str]]:
     very efficiently yet, but the random works fine with several iterations.
     :arg words: The
     """
+    words[:] = [word[:10].upper() for word in words]  # in place updating of words
     board = Board(10, 10)
     for _ in range(1000):  # try several random placements, reduce error risks
         random.shuffle(words)  # why just am I doing this? :D
@@ -241,11 +242,29 @@ def create_crossward(words: list[str]) -> list[list[str]]:
 
 def test():
     test_words = list(
-        map(str.upper, ["banana", "orange", "blue", "purple", "ken-morel", "ama"])
+        map(
+            str.upper,
+            [
+                "banana",
+                "orange",
+                "blue",
+                "purple",
+                "ken-morel",
+                "ama",
+                "upper",
+                "sixth",
+                "julia",
+                "language",
+                "python",
+                "bad",
+            ],
+        )
     )
     board = create_crossward(test_words)
     print(Board.frommatrix(board).textify())  # sorry lsp
     print("To make it easy, try to locate ken-morel (look for the hyphen)")
+    print("The hidden words are")
+    [print(f" - {w}") for w in test_words]
 
 
 if __name__ == "__main__":
