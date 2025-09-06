@@ -9,25 +9,11 @@ Tried to op for a set of simple, single operating functions(abit julian, but eas
 
 import random
 from contextlib import contextmanager
-from types import FunctionType
-
-try:
-    import pyoload
-
-    pyoload = pyoload.pyoload
-except:
-    pyoload = lambda f: f
-
-A = ord("A")
-Z = ord("Z")
-N = chr(0)
+import sys
+import random
 
 
-randch = lambda: chr(random.randrange(A, Z + 1))
-
-
-@pyoload
-class Board(list):
+class Board(list[list[str]]):
     """
     The puzzle board class
 
@@ -59,13 +45,23 @@ class Board(list):
         board[:] = [m.copy() for m in matrix]  # make sure to make a real copy
         return board
 
+    @staticmethod
+    def randch() -> str:
+        return chr(random.randrange(ord("A"), ord("Z")))
+
+    A = ord("A")
+    Z = ord("Z")
+    N = chr(0)
+
+    if ord("A") > ord("Z"):
+        print("Character set codes error")
     width: int
     height: int
 
     def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
-        super().__init__([[N for _ in range(height)] for _ in range(width)])
+        super().__init__([[Board.N for _ in range(height)] for _ in range(width)])
 
     @contextmanager
     def reset_on_noplace(self):
@@ -105,7 +101,7 @@ class Board(list):
         for y in range(self.height):
             for x in range(self.width):
                 ch = self[x][y]
-                text += " " if ch == N else ch
+                text += " " if ch == Board.N else ch
             text += "\n"
         return text
 
@@ -178,6 +174,7 @@ class Board(list):
                 raise error
             else:
                 raise Board.CanNotPlace(
+                    "Sorry, could not place that word. "
                     "Details unexpectedly unvailable "
                     "Well, yeah, this is kinda a bug"
                     ". Sorry"
@@ -190,7 +187,7 @@ class Board(list):
         It checks if the word passed can be written horizontaly
         rightwards from (x, y).
         """
-        return all([self[x + i][y] in (word[i], N) for i in range(len(word))])
+        return all([self[x + i][y] in (word[i], Board.N) for i in range(len(word))])
 
     def word_can_go_there_verticaly(self, x: int, y: int, word: str) -> bool:
         """
@@ -199,7 +196,7 @@ class Board(list):
         It checks if the word passed can be written verticaly
         downwards from (x, y).
         """
-        return all([self[x][y + i] in (word[i], N) for i in range(len(word))])
+        return all([self[x][y + i] in (word[i], Board.N) for i in range(len(word))])
 
     def fill_empty_spaces(self):
         """
@@ -208,12 +205,14 @@ class Board(list):
         """
         for x in range(self.width):
             for y in range(self.height):
-                if self[x][y] == N:
-                    self[x][y] = randch()
+                if self[x][y] == Board.N:
+                    self[x][y] = Board.randch()
 
 
-def create_crossward(words: list[str]) -> list[list[str]]:
+def create_crossword(words: list[str]) -> list[list[str]]:
     """
+    Generate a 10x10 word search puzzle containing the given words.
+
     This is the function asked in the excersice it creates a board,
     places the words in it, then return the board.
     The placement algorithm was made in such away to permit words
@@ -221,7 +220,10 @@ def create_crossward(words: list[str]) -> list[list[str]]:
     directions, and with crosswards. It does not implement an
     re-organisation algorithm to replace previously placed letters
     very efficiently yet, but the random works fine with several iterations.
-    :arg words: The
+
+    :Arg words: A list of words to include in the puzzle.
+
+    :returns: A 2D array (list of lists) representing the word search puzzle.
     """
     words[:] = [word[:10].upper() for word in words]  # in place updating of words
     board = Board(10, 10)
@@ -260,12 +262,33 @@ def test():
             ],
         )
     )
-    board = create_crossward(test_words)
+    board = create_crossword(test_words)
     print(Board.frommatrix(board).textify())  # sorry lsp
     print("To make it easy, try to locate ken-morel (look for the hyphen)")
     print("The hidden words are")
     [print(f" - {w}") for w in test_words]
 
 
+# --- Main execution block. DO NOT MODIFY.  ---
 if __name__ == "__main__":
-    test()
+    try:
+        # Read words from first line (comma-separated)
+        words_input = input().strip()
+        words = [word.strip() for word in words_input.split(",")]
+
+        # Generate the word search puzzle
+        puzzle = create_crossword(words)
+
+        # Print the result as a 2D grid
+        for row in puzzle:
+            print("".join(row))
+
+    except ValueError as e:
+        print(f"Input Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except EOFError:
+        print("Error: Not enough input lines provided.", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}", file=sys.stderr)
+        sys.exit(1)
